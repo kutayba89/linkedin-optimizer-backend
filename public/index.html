@@ -5,41 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LinkedIn Optimizer — AI Profile Enhancement Tool</title>
   <meta name="description" content="AI-powered LinkedIn profile, resume, and cover letter optimization. Get more recruiter responses in seconds.">
-  <!-- Inter font for a modern SaaS look -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* ---------- Design Tokens ---------- */
+    /* ---------- Design Tokens: bold yellow + black ---------- */
     :root {
-      --brand-500: #6366f1;   /* indigo */
-      --brand-600: #4f46e5;
-      --brand-700: #4338ca;
-      --accent-500: #8b5cf6;  /* violet */
+      --brand-500: #FFD200;   /* signature yellow */
+      --brand-600: #F5C400;   /* darker yellow (hover) */
+      --brand-700: #E0B400;
 
-      --ink-900: #0f172a;     /* headings */
-      --ink-700: #334155;     /* body */
-      --ink-500: #64748b;     /* muted */
-      --ink-300: #cbd5e1;
+      --ink-900: #111111;     /* headings / near-black */
+      --ink-700: #2b2b2b;     /* body */
+      --ink-500: #6b6b6b;     /* muted */
+      --ink-300: #d4d4d4;
 
       --bg: #ffffff;
-      --bg-soft: #f8fafc;
-      --border: #e2e8f0;
+      --bg-soft: #f7f7f7;
+      --border: #e5e5e5;
 
-      --gold: #f59e0b;
-      --green: #10b981;
+      --gold: #FFD200;
+      --green: #16a34a;
 
-      --radius: 16px;
-      --radius-sm: 10px;
-      --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
-      --shadow-md: 0 8px 24px rgba(15,23,42,.08);
-      --shadow-lg: 0 20px 50px rgba(79,70,229,.18);
-      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 60%, #a855f7 100%);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+      --shadow-md: 0 6px 20px rgba(0,0,0,.10);
+      --shadow-lg: 0 16px 40px rgba(0,0,0,.16);
       --max: 1120px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -52,180 +48,187 @@
 
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
-    h1, h2, h3 { color: var(--ink-900); letter-spacing: -0.02em; line-height: 1.15; }
+    h1, h2, h3 {
+      color: var(--ink-900);
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
 
     /* ---------- Navbar ---------- */
     .nav {
       position: sticky; top: 0; z-index: 50;
-      backdrop-filter: saturate(180%) blur(12px);
-      background: rgba(255,255,255,.8);
-      border-bottom: 1px solid var(--border);
+      background: #fff;
+      border-bottom: 2px solid var(--ink-900);
     }
     .nav-inner {
-      max-width: var(--max); margin: 0 auto; padding: 14px 24px;
+      max-width: var(--max); margin: 0 auto; padding: 16px 24px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--ink-900); font-size: 1.15rem; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; color: var(--ink-900); font-size: 1.25rem; text-transform: uppercase; letter-spacing: -0.02em; }
     .brand .dot {
-      width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
-      background: var(--gradient); color: #fff; font-size: 15px;
+      width: 34px; height: 34px; border-radius: 6px; display: grid; place-items: center;
+      background: var(--brand-500); color: #111; font-size: 17px;
     }
     .nav-links { display: flex; gap: 28px; align-items: center; }
-    .nav-links a { color: var(--ink-500); text-decoration: none; font-weight: 500; font-size: .95rem; transition: color .2s; }
-    .nav-links a:hover { color: var(--ink-900); }
+    .nav-links a { color: var(--ink-900); text-decoration: none; font-weight: 600; font-size: .95rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--brand-700); }
     @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
 
     /* ---------- Buttons ---------- */
     .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-family: inherit; font-weight: 600; font-size: 1rem;
-      padding: 14px 28px; border-radius: var(--radius-sm);
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: inherit; font-weight: 700; font-size: 1rem;
+      padding: 15px 30px; border-radius: var(--radius-sm);
       cursor: pointer; border: none; text-decoration: none;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
     }
-    .btn-primary { background: var(--gradient); color: #fff; box-shadow: var(--shadow-md); }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-    .btn-ghost { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.35); }
-    .btn-ghost:hover { background: rgba(255,255,255,.25); }
-    .btn-sm { padding: 9px 18px; font-size: .9rem; }
-    .btn-white { background: #fff; color: var(--brand-600); }
-    .btn-white:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-primary { background: var(--brand-500); color: #111; box-shadow: var(--shadow-md); }
+    .btn-primary:hover { background: var(--brand-600); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-dark { background: var(--ink-900); color: #fff; }
+    .btn-dark:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-outline { background: #fff; color: var(--ink-900); border: 2px solid var(--ink-900); }
+    .btn-outline:hover { background: var(--ink-900); color: #fff; }
+    .btn-sm { padding: 10px 20px; font-size: .9rem; }
+    .btn .arrow { font-size: 1.1em; }
 
     /* ---------- Hero ---------- */
     .hero {
-      position: relative; overflow: hidden;
-      background: radial-gradient(1200px 500px at 50% -10%, rgba(139,92,246,.18), transparent 60%), var(--bg-soft);
-      padding: 90px 20px 100px;
-      text-align: center;
+      background: var(--bg);
+      padding: 80px 20px 90px;
+      border-bottom: 2px solid var(--ink-900);
     }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 50px; align-items: center; }
+    @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; text-align: center; } }
     .badge {
       display: inline-flex; align-items: center; gap: 8px;
-      background: #fff; border: 1px solid var(--border); color: var(--ink-700);
-      padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 500;
-      box-shadow: var(--shadow-sm); margin-bottom: 24px;
+      background: var(--brand-500); color: #111;
+      padding: 7px 16px; border-radius: 999px; font-size: .8rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .04em; margin-bottom: 22px;
     }
-    .badge .pill { color: var(--brand-600); font-weight: 700; }
-    .hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 800; margin-bottom: 20px; }
-    .hero h1 .grad {
-      background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent;
+    .hero h1 { font-size: clamp(2.4rem, 5.5vw, 4rem); margin-bottom: 20px; }
+    .hero h1 .hl { color: var(--brand-600); }
+    .hero .subtext { font-size: 1.15rem; color: var(--ink-500); max-width: 540px; margin-bottom: 32px; }
+    @media (max-width: 900px) { .hero .subtext { margin-left: auto; margin-right: auto; } }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    @media (max-width: 900px) { .hero-actions { justify-content: center; } }
+    .trust { margin-top: 26px; font-size: .9rem; color: var(--ink-500); font-weight: 600; }
+    .hero-visual {
+      background: var(--brand-500); border: 2px solid var(--ink-900); border-radius: var(--radius);
+      padding: 44px; box-shadow: 10px 10px 0 var(--ink-900);
     }
-    .hero .subtext { font-size: 1.2rem; color: var(--ink-500); max-width: 620px; margin: 0 auto 32px; }
-    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .trust { margin-top: 26px; font-size: .9rem; color: var(--ink-500); }
+    .hero-visual .big { font-size: 3.4rem; font-weight: 900; color: #111; line-height: 1; }
+    .hero-visual .lbl { font-weight: 700; color: #111; text-transform: uppercase; font-size: .85rem; letter-spacing: .05em; margin-top: 6px; }
+    .hero-visual hr { border: none; border-top: 2px solid rgba(0,0,0,.15); margin: 20px 0; }
 
     /* ---------- Sections ---------- */
     .section { padding: 88px 20px; }
-    .section-head { text-align: center; max-width: 640px; margin: 0 auto 56px; }
-    .section-head .eyebrow { color: var(--brand-600); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; margin-bottom: 12px; }
-    .section-head h2 { font-size: clamp(1.9rem, 3.5vw, 2.5rem); font-weight: 800; }
-    .section-head p { color: var(--ink-500); font-size: 1.1rem; margin-top: 14px; }
+    .section-head { text-align: center; max-width: 680px; margin: 0 auto 56px; }
+    .section-head .eyebrow { color: var(--ink-900); font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; margin-bottom: 14px; display: inline-block; border-bottom: 3px solid var(--brand-500); padding-bottom: 4px; }
+    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.7rem); }
+    .section-head p { color: var(--ink-500); font-size: 1.1rem; margin-top: 16px; text-transform: none; }
     .soft { background: var(--bg-soft); }
 
-    /* Stat strip */
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 800px; margin: 0 auto; }
+    /* ---------- Stats ---------- */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; max-width: 900px; margin: 0 auto; border: 2px solid var(--ink-900); border-radius: var(--radius); overflow: hidden; }
     @media (max-width: 700px) { .stats { grid-template-columns: 1fr; } }
-    .stat { text-align: center; }
-    .stat .num { font-size: 2.4rem; font-weight: 800; color: var(--brand-600); }
-    .stat .lbl { color: var(--ink-500); font-size: .95rem; }
+    .stat { text-align: center; padding: 32px 20px; border-right: 2px solid var(--ink-900); }
+    .stat:last-child { border-right: none; }
+    @media (max-width: 700px) { .stat { border-right: none; border-bottom: 2px solid var(--ink-900); } .stat:last-child { border-bottom: none; } }
+    .stat .num { font-size: 2.6rem; font-weight: 900; color: var(--ink-900); }
+    .stat .lbl { color: var(--ink-500); font-size: .9rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
 
     /* ---------- Features ---------- */
     .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     @media (max-width: 860px) { .features { grid-template-columns: 1fr; } }
     .feature {
       background: #fff; padding: 32px; border-radius: var(--radius);
-      border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-      transition: transform .25s ease, box-shadow .25s ease, border-color .25s;
+      border: 2px solid var(--ink-900);
+      transition: transform .2s ease, box-shadow .2s ease;
     }
-    .feature:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: #d6d3f5; }
+    .feature:hover { transform: translateY(-4px); box-shadow: 8px 8px 0 var(--brand-500); }
     .feature .icon {
-      width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center;
-      font-size: 1.6rem; margin-bottom: 18px;
-      background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.12));
+      width: 56px; height: 56px; border-radius: 8px; display: grid; place-items: center;
+      font-size: 1.6rem; margin-bottom: 18px; background: var(--brand-500); border: 2px solid var(--ink-900);
     }
-    .feature h3 { font-size: 1.25rem; margin-bottom: 10px; }
-    .feature p { color: var(--ink-500); font-size: .97rem; }
+    .feature h3 { font-size: 1.2rem; margin-bottom: 10px; }
+    .feature p { color: var(--ink-500); font-size: .97rem; text-transform: none; }
 
     /* ---------- Benefits ---------- */
-    .benefit-list { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 820px; margin: 0 auto; }
+    .benefit-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 820px; margin: 0 auto; }
     @media (max-width: 700px) { .benefit-list { grid-template-columns: 1fr; } }
     .benefit-item {
       display: flex; gap: 14px; align-items: center;
-      background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 16px 18px; box-shadow: var(--shadow-sm);
+      background: #fff; border: 2px solid var(--ink-900); border-radius: var(--radius-sm);
+      padding: 16px 18px;
     }
     .benefit-item .check {
-      flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
-      background: var(--green); color: #fff; display: grid; place-items: center; font-size: .85rem; font-weight: 700;
+      flex-shrink: 0; width: 28px; height: 28px; border-radius: 6px;
+      background: var(--brand-500); color: #111; display: grid; place-items: center; font-size: .9rem; font-weight: 900; border: 2px solid var(--ink-900);
     }
-    .benefit-item span { color: var(--ink-700); font-weight: 500; }
+    .benefit-item span { color: var(--ink-900); font-weight: 600; }
 
     /* ---------- Testimonials ---------- */
     .testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     @media (max-width: 860px) { .testimonials { grid-template-columns: 1fr; } }
-    .testimonial {
-      background: #fff; padding: 28px; border-radius: var(--radius);
-      border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-    }
-    .testimonial .stars { color: var(--gold); margin-bottom: 12px; font-size: 1rem; letter-spacing: 2px; }
-    .testimonial p { color: var(--ink-700); font-style: italic; margin-bottom: 18px; font-size: .97rem; }
+    .testimonial { background: #fff; padding: 28px; border-radius: var(--radius); border: 2px solid var(--ink-900); }
+    .testimonial .stars { color: var(--ink-900); margin-bottom: 12px; font-size: 1rem; letter-spacing: 2px; }
+    .testimonial p { color: var(--ink-700); font-style: italic; margin-bottom: 18px; font-size: .97rem; text-transform: none; }
     .testimonial .author { display: flex; align-items: center; gap: 12px; }
     .testimonial .avatar {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-      display: grid; place-items: center; color: #fff; font-weight: 700; font-size: .9rem;
-      background: var(--gradient);
+      width: 42px; height: 42px; border-radius: 8px; flex-shrink: 0;
+      display: grid; place-items: center; color: #111; font-weight: 900; font-size: .9rem;
+      background: var(--brand-500); border: 2px solid var(--ink-900);
     }
     .testimonial .author .meta { line-height: 1.3; }
-    .testimonial .author .name { font-weight: 600; color: var(--ink-900); font-size: .92rem; }
+    .testimonial .author .name { font-weight: 800; color: var(--ink-900); font-size: .92rem; }
     .testimonial .author .role { color: var(--ink-500); font-size: .82rem; }
 
     /* ---------- Pricing ---------- */
     .price-card {
       background: #fff; border-radius: var(--radius); padding: 44px 40px;
       max-width: 420px; margin: 0 auto; position: relative;
-      border: 1px solid var(--border); box-shadow: var(--shadow-md);
-    }
-    .price-card::before {
-      content: ""; position: absolute; inset: 0; border-radius: var(--radius);
-      padding: 2px; background: var(--gradient);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+      border: 2px solid var(--ink-900); box-shadow: 10px 10px 0 var(--brand-500);
     }
     .price-card .tag {
-      display: inline-block; background: rgba(99,102,241,.1); color: var(--brand-600);
-      font-weight: 600; font-size: .82rem; padding: 5px 12px; border-radius: 999px; margin-bottom: 16px;
+      display: inline-block; background: var(--brand-500); color: #111; border: 2px solid var(--ink-900);
+      font-weight: 800; font-size: .78rem; padding: 5px 12px; border-radius: 999px; margin-bottom: 16px;
+      text-transform: uppercase; letter-spacing: .04em;
     }
-    .price-card h3 { font-size: 1.4rem; margin-bottom: 6px; }
-    .price { font-size: 3.2rem; font-weight: 800; color: var(--ink-900); margin: 14px 0 4px; }
-    .price small { font-size: 1rem; color: var(--ink-500); font-weight: 500; }
-    .price-note { color: var(--ink-500); font-size: .9rem; margin-bottom: 26px; }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: 6px; }
+    .price { font-size: 3.4rem; font-weight: 900; color: var(--ink-900); margin: 14px 0 4px; }
+    .price small { font-size: 1rem; color: var(--ink-500); font-weight: 600; }
+    .price-note { color: var(--ink-500); font-size: .9rem; margin-bottom: 26px; text-transform: none; }
     .price-features { list-style: none; text-align: left; margin: 0 0 30px; }
     .price-features li {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--ink-700); font-size: .95rem;
+      padding: 11px 0; border-bottom: 1px solid var(--border); color: var(--ink-700); font-size: .95rem;
     }
     .price-features li:last-child { border-bottom: none; }
-    .price-features li::before { content: "✓"; color: var(--green); font-weight: 700; }
+    .price-features li::before { content: "✓"; color: var(--ink-900); font-weight: 900; background: var(--brand-500); width: 20px; height: 20px; display: grid; place-items: center; border-radius: 4px; font-size: .75rem; flex-shrink: 0; }
     .price-card .btn { width: 100%; justify-content: center; }
 
     /* ---------- Final CTA ---------- */
-    .cta-final { position: relative; overflow: hidden; background: var(--gradient); color: #fff; text-align: center; padding: 90px 20px; }
-    .cta-final::after {
-      content: ""; position: absolute; inset: 0;
-      background: radial-gradient(600px 300px at 50% 0%, rgba(255,255,255,.18), transparent 70%);
-      pointer-events: none;
-    }
-    .cta-final h2 { color: #fff; font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 16px; position: relative; }
-    .cta-final p { font-size: 1.15rem; max-width: 620px; margin: 0 auto 30px; opacity: .95; position: relative; }
-    .cta-final .btn { position: relative; }
+    .cta-final { background: var(--brand-500); color: #111; text-align: center; padding: 90px 20px; border-top: 2px solid var(--ink-900); border-bottom: 2px solid var(--ink-900); }
+    .cta-final h2 { color: #111; font-size: clamp(2rem, 4.5vw, 3rem); margin-bottom: 16px; }
+    .cta-final p { font-size: 1.15rem; max-width: 620px; margin: 0 auto 30px; color: #111; text-transform: none; font-weight: 500; }
 
     /* ---------- Footer ---------- */
-    footer { background: var(--ink-900); color: #94a3b8; padding: 40px 20px; }
-    .footer-inner { max-width: var(--max); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    footer .brand { color: #fff; }
-    footer .dot { background: var(--gradient); }
-    footer a { color: #94a3b8; text-decoration: none; transition: color .2s; }
-    footer a:hover { color: #fff; }
-    .footer-links { display: flex; gap: 24px; font-size: .9rem; }
+    footer { background: var(--ink-900); color: #cbcbcb; padding: 56px 20px 32px; }
+    .footer-inner { max-width: var(--max); margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; }
+    @media (max-width: 760px) { .footer-inner { grid-template-columns: 1fr; gap: 28px; } }
+    footer .brand { color: #fff; margin-bottom: 14px; }
+    footer .dot { background: var(--brand-500); }
+    footer p { font-size: .92rem; line-height: 1.7; }
+    footer h4 { color: #fff; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 14px; font-weight: 800; }
+    footer ul { list-style: none; }
+    footer li { margin-bottom: 8px; }
+    footer a { color: #cbcbcb; text-decoration: none; font-size: .92rem; transition: color .2s; }
+    footer a:hover { color: var(--brand-500); }
+    .footer-bottom { max-width: var(--max); margin: 40px auto 0; padding-top: 24px; border-top: 1px solid #333; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: .85rem; color: #888; }
+    /* Placeholder styling for Impressum / company info you'll add later */
+    .placeholder { color: #777; font-style: italic; }
   </style>
 </head>
 <body>
@@ -238,7 +241,7 @@
         <a href="#features">Features</a>
         <a href="#benefits">Benefits</a>
         <a href="#pricing">Pricing</a>
-        <a href="#pricing" class="btn btn-primary btn-sm nav-cta">Get Started</a>
+        <a href="#pricing" class="btn btn-primary btn-sm nav-cta">Get Started <span class="arrow">→</span></a>
       </div>
     </div>
   </nav>
@@ -246,14 +249,28 @@
   <!-- Hero -->
   <header class="hero">
     <div class="container">
-      <span class="badge">✨ <span class="pill">AI-Powered</span> Profile Optimization</span>
-      <h1>Get More Job Interviews with<br><span class="grad">AI-Optimized Profiles</span></h1>
-      <p class="subtext">Professional-grade content optimization powered by advanced AI. In seconds, get actionable suggestions to make your LinkedIn profile irresistible to recruiters.</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary" onclick="scrollToPrice()">Get Started Today →</button>
-        <a href="#features" class="btn btn-white" style="border:1px solid var(--border);">See How It Works</a>
+      <div class="hero-grid">
+        <div>
+          <span class="badge">✨ AI-Powered</span>
+          <h1>Get More Interviews With <span class="hl">AI-Optimized</span> Profiles</h1>
+          <p class="subtext">Professional-grade content optimization powered by advanced AI. In seconds, get actionable suggestions to make your LinkedIn profile irresistible to recruiters.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="scrollToPrice()">Get Started Today <span class="arrow">→</span></button>
+            <a href="#features" class="btn btn-outline">See How It Works</a>
+          </div>
+          <p class="trust">⭐️⭐️⭐️⭐️⭐️ &nbsp;Trusted by hundreds of job seekers</p>
+        </div>
+        <div class="hero-visual">
+          <div class="big">6s</div>
+          <div class="lbl">Recruiter attention span</div>
+          <hr>
+          <div class="big">5×</div>
+          <div class="lbl">More recruiter responses</div>
+          <hr>
+          <div class="big">€19</div>
+          <div class="lbl">One-time · lifetime access</div>
+        </div>
       </div>
-      <p class="trust">⭐️⭐️⭐️⭐️⭐️ &nbsp;Trusted by hundreds of job seekers</p>
     </div>
   </header>
 
@@ -261,9 +278,9 @@
   <section class="section" style="padding-top:64px;padding-bottom:64px;">
     <div class="container">
       <div class="stats">
-        <div class="stat"><div class="num">6s</div><div class="lbl">Avg. recruiter attention span</div></div>
-        <div class="stat"><div class="num">5×</div><div class="lbl">More recruiter responses</div></div>
-        <div class="stat"><div class="num">100%</div><div class="lbl">Works for any industry</div></div>
+        <div class="stat"><div class="num">6s</div><div class="lbl">Avg. attention span</div></div>
+        <div class="stat"><div class="num">5×</div><div class="lbl">More responses</div></div>
+        <div class="stat"><div class="num">100%</div><div class="lbl">Any industry</div></div>
       </div>
     </div>
   </section>
@@ -271,18 +288,17 @@
   <!-- Problem -->
   <section class="section soft">
     <div class="section-head">
-      <div class="eyebrow">The Problem</div>
+      <span class="eyebrow">The Problem</span>
       <h2>Your LinkedIn Profile Matters</h2>
-      <p>📊 Recruiters spend just <strong>6 seconds</strong> on your profile. Most professionals waste that moment with unclear messaging, weak keywords, and missed impact.</p>
-      <p style="color:var(--brand-600);font-weight:600;margin-top:18px;">✅ LinkedIn Optimizer fixes this instantly.</p>
+      <p>📊 Recruiters spend just <strong>6 seconds</strong> on your profile. Most professionals waste that moment with unclear messaging, weak keywords, and missed impact. <strong>LinkedIn Optimizer fixes this instantly.</strong></p>
     </div>
   </section>
 
   <!-- Features -->
   <section class="section" id="features">
     <div class="section-head">
-      <div class="eyebrow">What You Get</div>
-      <h2>Everything you need to stand out</h2>
+      <span class="eyebrow">What You Get</span>
+      <h2>Everything You Need To Stand Out</h2>
     </div>
     <div class="container">
       <div class="features">
@@ -308,7 +324,7 @@
   <!-- Benefits -->
   <section class="section soft" id="benefits">
     <div class="section-head">
-      <div class="eyebrow">Why Us</div>
+      <span class="eyebrow">Why Us</span>
       <h2>Why LinkedIn Optimizer?</h2>
     </div>
     <div class="container">
@@ -326,8 +342,8 @@
   <!-- Testimonials -->
   <section class="section">
     <div class="section-head">
-      <div class="eyebrow">Social Proof</div>
-      <h2>Trusted by job seekers</h2>
+      <span class="eyebrow">Social Proof</span>
+      <h2>Trusted By Job Seekers</h2>
     </div>
     <div class="container">
       <div class="testimonials">
@@ -353,8 +369,8 @@
   <!-- Pricing -->
   <section class="section soft" id="pricing">
     <div class="section-head">
-      <div class="eyebrow">Pricing</div>
-      <h2>Simple, transparent pricing</h2>
+      <span class="eyebrow">Pricing</span>
+      <h2>Simple, Transparent Pricing</h2>
     </div>
     <div class="container">
       <div class="price-card">
@@ -369,7 +385,7 @@
           <li>Professional bio refinement</li>
           <li>Copy &amp; download results</li>
         </ul>
-        <button class="btn btn-primary" onclick="buyNow()">Buy Now — €19</button>
+        <button class="btn btn-primary" onclick="buyNow()">Get Started <span class="arrow">→</span></button>
       </div>
     </div>
   </section>
@@ -377,34 +393,68 @@
   <!-- Final CTA -->
   <section class="cta-final">
     <div class="container">
-      <h2>Ready to Land More Interviews?</h2>
+      <h2>Ready To Land More Interviews?</h2>
       <p>Join hundreds of professionals who've upgraded their LinkedIn profiles and landed better job opportunities.</p>
-      <button class="btn btn-white" onclick="buyNow()">Get LinkedIn Optimizer Now — €19</button>
+      <button class="btn btn-dark" onclick="buyNow()">Get LinkedIn Optimizer Now <span class="arrow">→</span></button>
     </div>
   </section>
 
   <!-- Footer -->
   <footer>
     <div class="footer-inner">
-      <div class="brand"><span class="dot">🚀</span> LinkedIn Optimizer</div>
-      <div class="footer-links">
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#">Privacy Policy</a>
+      <!-- Column 1: Brand + company (fill in later) -->
+      <div>
+        <div class="brand"><span class="dot">🚀</span> LinkedIn Optimizer</div>
+        <p>AI-powered optimization for LinkedIn profiles, resumes, and cover letters. Get more recruiter responses in seconds.</p>
+        <!-- TODO: Replace with your company name once registered -->
+        <p class="placeholder" style="margin-top:12px;">[Your Company Name — to be added]</p>
       </div>
-      <div style="font-size:.85rem;">© 2026 LinkedIn Optimizer · Powered by AI</div>
+
+      <!-- Column 2: Product links -->
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#benefits">Benefits</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Legal — REQUIRED in Germany. Fill these in before selling. -->
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <!-- TODO: Create these pages before you go live (German law requires Impressum + Datenschutz) -->
+          <li><a href="/impressum.html">Impressum</a></li>
+          <li><a href="/datenschutz.html">Datenschutz / Privacy</a></li>
+          <li><a href="/agb.html">Terms / AGB</a></li>
+          <li><a href="/widerruf.html">Widerrufsrecht</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <!-- TODO: Replace [Your Company Name] once your Gewerbe is registered -->
+      <span>© <span id="year"></span> [Your Company Name] · LinkedIn Optimizer</span>
+      <span>Powered by AI</span>
     </div>
   </footer>
 
   <script>
+    // Auto-update the copyright year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
     function scrollToPrice() {
       document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
     }
 
     function buyNow() {
-      // For now, this shows a message.
-      // Later, connect to Gumroad or Stripe Checkout.
-      alert('🎉 Coming Soon!\n\nWe\'re setting up payment processing.\n\nEmail: your-email@example.com to get early access!');
+      // TODO: Replace with your Ko-fi shop item link once payments are approved & live.
+      // Example: window.location.href = 'https://ko-fi.com/s/YOUR_ITEM_ID';
+      //
+      // For now (pre-launch), point this to your free waitlist form instead:
+      // window.location.href = 'https://tally.so/r/YOUR_FORM_ID';
+      alert('🎉 Coming Soon!\n\nWe\'re setting up access.\n\nEmail us to get early access!');
     }
   </script>
 </body>
