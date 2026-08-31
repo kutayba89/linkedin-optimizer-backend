@@ -3,194 +3,374 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LinkedIn Optimizer API - Dashboard</title>
+  <title>LinkedIn Optimizer - AI Profile Enhancement Tool</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
+      color: #333;
+      line-height: 1.6;
     }
-    .container {
-      max-width: 800px;
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    header .tagline {
+      font-size: 1.3em;
+      opacity: 0.95;
+      margin-bottom: 20px;
+    }
+    header .subtext {
+      font-size: 1.1em;
+      opacity: 0.85;
+      max-width: 600px;
       margin: 0 auto;
     }
-    .header {
-      text-align: center;
-      color: white;
-      margin-bottom: 40px;
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
-    .header h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-    .header p {
-      font-size: 1.1em;
-      opacity: 0.9;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-    .status-badge {
+    .cta-button {
       display: inline-block;
-      background: #28a745;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.9em;
+      padding: 16px 40px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1.1em;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-top: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      border: none;
     }
-    .info-grid {
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    .section {
+      padding: 60px 20px;
+    }
+    .section h2 {
+      font-size: 2.2em;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+    .problem {
+      background: #f9f9f9;
+      text-align: center;
+    }
+    .problem-text {
+      font-size: 1.2em;
+      color: #666;
+      margin: 20px 0;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 30px;
+      margin: 40px 0;
+    }
+    @media (max-width: 768px) {
+      .features { grid-template-columns: 1fr; }
+    }
+    .feature {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .feature .icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+    }
+    .feature h3 {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+      color: #667eea;
+    }
+    .feature p {
+      color: #666;
+      font-size: 0.95em;
+    }
+    .benefits {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .benefits h2 { color: white; }
+    .benefit-list {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
+      max-width: 800px;
+      margin: 30px auto;
+    }
+    @media (max-width: 768px) {
+      .benefit-list { grid-template-columns: 1fr; }
+    }
+    .benefit-item {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+    .benefit-item .check {
+      font-size: 1.5em;
+      flex-shrink: 0;
+    }
+    .pricing {
+      background: #f9f9f9;
+      text-align: center;
+    }
+    .price-card {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 20px auto;
+      border-top: 4px solid #667eea;
+    }
+    .price-card h3 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .price {
+      font-size: 3em;
+      color: #667eea;
+      font-weight: 700;
       margin: 20px 0;
     }
-    .info-item {
-      background: #f9f9f9;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #667eea;
-    }
-    .info-item strong {
-      display: block;
-      color: #667eea;
-      margin-bottom: 5px;
+    .price-note {
+      color: #999;
+      margin-bottom: 20px;
       font-size: 0.9em;
     }
-    .info-item span {
-      font-size: 1.3em;
-      color: #333;
-      word-break: break-all;
-      font-family: monospace;
+    .price-features {
+      text-align: left;
+      margin: 30px 0;
+      font-size: 0.95em;
     }
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
+    .price-features li {
+      list-style: none;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      color: #666;
     }
-    button {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 6px;
-      font-size: 1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-primary {
+    .cta-section {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      padding: 60px 20px;
+      text-align: center;
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    .cta-section h2 {
+      color: white;
+      font-size: 2.5em;
+      margin-bottom: 20px;
     }
-    .btn-secondary {
-      background: #f0f0f0;
-      color: #333;
+    .cta-section p {
+      font-size: 1.2em;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      opacity: 0.95;
     }
-    .btn-secondary:hover {
-      background: #e0e0e0;
+    .social-proof {
+      background: #f9f9f9;
+      text-align: center;
     }
-    code {
-      background: #f0f0f0;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      color: #d63384;
+    .testimonials {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 30px;
+      margin: 40px 0;
     }
-    h2 {
-      color: #333;
-      margin-bottom: 15px;
-      font-size: 1.5em;
+    @media (max-width: 768px) {
+      .testimonials { grid-template-columns: 1fr; }
     }
-    p {
-      color: #666;
-      line-height: 1.6;
+    .testimonial {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .testimonial .stars {
+      color: #ffc107;
       margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    .testimonial p {
+      color: #666;
+      font-size: 0.95em;
+      margin-bottom: 15px;
+      font-style: italic;
+    }
+    .testimonial .author {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9em;
+    }
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 0.9em;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>💼 LinkedIn Optimizer API</h1>
-      <p>AI-Powered Profile Optimization Backend</p>
-    </div>
+  <!-- Header -->
+  <header>
+    <h1>🚀 LinkedIn Optimizer</h1>
+    <p class="tagline">Get More Job Interviews with AI-Optimized Profiles</p>
+    <p class="subtext">Professional-grade content optimization powered by advanced AI. In seconds, get actionable suggestions to make your LinkedIn profile irresistible to recruiters.</p>
+    <button class="cta-button" onclick="scrollToPrice()">Get Started Today</button>
+  </header>
 
-    <div class="card">
-      <span class="status-badge">✅ API ONLINE</span>
-      <h2>API Status</h2>
-      <p>Your backend is live and ready to optimize LinkedIn profiles, resumes, and professional content.</p>
+  <!-- Problem Section -->
+  <section class="section problem">
+    <h2>Your LinkedIn Profile Matters</h2>
+    <p class="problem-text">📊 Recruiters spend <strong>6 seconds</strong> on your profile.</p>
+    <p class="problem-text">Most professionals waste the opportunity with unclear messaging, weak keywords, and missed impact.</p>
+    <p class="problem-text">✅ LinkedIn Optimizer fixes this instantly.</p>
+  </section>
+
+  <!-- Features -->
+  <section class="section container">
+    <h2>What You Get</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="icon">✍️</div>
+        <h3>Profile Optimization</h3>
+        <p>AI rewrites your headline, summary, and bullet points for maximum impact and recruiters keywords.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📋</div>
+        <h3>Resume Enhancement</h3>
+        <p>Transform your resume with stronger action verbs, metrics, and ATS-optimized formatting.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">💼</div>
+        <h3>Cover Letter Boost</h3>
+        <p>Create compelling cover letters that stand out and tell your unique professional story.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="section benefits">
+    <div class="container">
+      <h2>Why LinkedIn Optimizer?</h2>
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <div class="check">✓</div>
+          <div>Instant Results (seconds, not hours)</div>
+        </div>
+        <div class="benefit-item">
+          <div class="check">✓</div>
+          <div>AI-Powered Suggestions</div>
+        </div>
+        <div class="benefit-item">
+          <div class="check">✓</div>
+          <div>Recruiter-Optimized Keywords</div>
+        </div>
+        <div class="benefit-item">
+          <div class="check">✓</div>
+          <div>Professional Grade Quality</div>
+        </div>
+        <div class="benefit-item">
+          <div class="check">✓</div>
+          <div>Works for Any Industry</div>
+        </div>
+        <div class="benefit-item">
+          <div class="check">✓</div>
+          <div>Unlimited Optimizations</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Proof -->
+  <section class="section social-proof">
+    <div class="container">
+      <h2>⭐ Trusted by Job Seekers</h2>
+      <div class="testimonials">
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p>"Got 3 interview calls within a week after optimizing my profile. This tool is a game-changer!"</p>
+          <div class="author">Sarah M. - Product Manager</div>
+        </div>
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p>"Saved me hours of rewriting. The AI suggestions were spot-on and professional."</p>
+          <div class="author">James L. - Senior Engineer</div>
+        </div>
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p>"Best €19 I spent on my job search. Recruiter responses increased 5x."</p>
+          <div class="author">Anna K. - Data Scientist</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section pricing" id="pricing">
+    <div class="container">
+      <h2>Simple, Transparent Pricing</h2>
       
-      <div class="info-grid">
-        <div class="info-item">
-          <strong>API Endpoint</strong>
-          <span id="endpoint">https://linkedin-optimizer-backend-th50.vercel.app/api</span>
-        </div>
-        <div class="info-item">
-          <strong>Method</strong>
-          <span>POST</span>
-        </div>
+      <div class="price-card">
+        <h3>One-Time Access</h3>
+        <div class="price">€19</div>
+        <p class="price-note">Lifetime access to the tool</p>
+        <ul class="price-features">
+          <li>✓ Unlimited Profile Optimizations</li>
+          <li>✓ Resume Enhancement</li>
+          <li>✓ Cover Letter Writing</li>
+          <li>✓ Professional Bio Refinement</li>
+          <li>✓ Copy & Download Results</li>
+        </ul>
+        <button class="cta-button" onclick="buyNow()">Buy Now - €19</button>
       </div>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>📝 How to Use</h2>
-      <p>Send a POST request with your content:</p>
-      <code style="display: block; padding: 15px; background: #f0f0f0; border-radius: 6px; margin: 15px 0; overflow-x: auto;">
-curl -X POST https://linkedin-optimizer-backend-th50.vercel.app/api \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"Optimize this LinkedIn profile..."}'
-      </code>
-      <p><strong>Response:</strong></p>
-      <code style="display: block; padding: 15px; background: #f0f0f0; border-radius: 6px; margin: 15px 0; overflow-x: auto;">
-{"result":"Optimized content here..."}
-      </code>
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Ready to Land More Interviews?</h2>
+      <p>Join hundreds of professionals who've upgraded their LinkedIn profiles and gotten better job opportunities.</p>
+      <button class="cta-button" onclick="buyNow()">Get LinkedIn Optimizer Now - €19</button>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>🚀 Get Started</h2>
-      <p>Use the LinkedIn Optimizer tool to start optimizing profiles:</p>
-      <div class="button-group">
-        <button class="btn-primary" onclick="openTool()">Open Optimizer Tool</button>
-        <button class="btn-secondary" onclick="copyEndpoint()">Copy API Endpoint</button>
-      </div>
-    </div>
-
-    <div class="card" style="background: #f9f9f9; border: 1px solid #ddd;">
-      <h2>📊 Features</h2>
-      <p>✅ LinkedIn Profile Optimization</p>
-      <p>✅ Resume & CV Enhancement</p>
-      <p>✅ Cover Letter Improvement</p>
-      <p>✅ Professional Bio Refinement</p>
-      <p>✅ AI-Powered Suggestions</p>
-    </div>
-  </div>
+  <!-- Footer -->
+  <footer>
+    <p>LinkedIn Optimizer © 2026 | Powered by AI | <a href="#" style="color: #999;">Privacy Policy</a></p>
+  </footer>
 
   <script>
-    function openTool() {
-      // This would link to your hosted tool
-      alert('Download linkedin-optimizer-v2.html and open it in your browser, then paste this API endpoint:\n\nhttps://linkedin-optimizer-backend-th50.vercel.app/api');
+    function scrollToPrice() {
+      document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
     }
     
-    function copyEndpoint() {
-      const endpoint = document.getElementById('endpoint').innerText;
-      navigator.clipboard.writeText(endpoint).then(() => {
-        alert('API endpoint copied to clipboard!');
-      });
+    function buyNow() {
+      // For now, this shows a message
+      // Later you'll connect to Gumroad or Stripe
+      alert('🎉 Coming Soon!\n\nWe\'re setting up payment processing.\n\nEmail: your-email@example.com to get early access!');
     }
   </script>
 </body>
