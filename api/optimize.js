@@ -4,6 +4,30 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const MODEL = "gemini-3.6-flash"; // fast + free-tier friendly
 
+/* ---------- License / access control ----------
+ * Configured entirely via Vercel Environment Variables — no code changes needed later.
+ *
+ * ACCESS_CODES     Comma-separated list of valid paid access codes,
+ *                  e.g. "LIO-AB12-CD34,LIO-EF56-GH78"
+ * ENFORCE_LICENSE  "true" to REQUIRE a valid code on every request (real paywall).
+ *                  Unset/"false" = open (free-trial handled softly on the frontend).
+ *
+ * Because this check runs on the SERVER, it cannot be bypassed from the browser.
+ */
+function getValidCodes() {
+  return (process.env.ACCESS_CODES || "")
+    .split(",")
+    .map((c) => c.trim().toUpperCase())
+    .filter(Boolean);
+}
+function isEnforcing() {
+  return String(process.env.ENFORCE_LICENSE || "").toLowerCase() === "true";
+}
+function isValidCode(code) {
+  if (!code) return false;
+  return getValidCodes().includes(String(code).trim().toUpperCase());
+}
+
 // Structured optimization modes with strong, purpose-built system prompts.
 const MODES = {
   headline: {
@@ -90,7 +114,15 @@ export default async function handler(req, res) {
       }
     }
 
-    const { mode, text, context } = body || {};
+    const { mode, text, context, code } = body || {};
+
+    // Server-side license gate (bypass-proof). Only blocks when you turn it on.
+    if (isEnforcing() && !isValidCode(code)) {
+      return res.status(402).json({
+        error: "A valid access code is required. Please purchase access to continue.",
+        code: "LICENSE_REQUIRED",
+      });
+    }
 
     if (!mode || !MODES[mode]) {
       return res.status(400).json({

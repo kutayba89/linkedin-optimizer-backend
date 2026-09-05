@@ -111,6 +111,43 @@
     .msg { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; font-weight: 600; margin-top: 14px; display: none; }
     .msg.error { background: #fee2e2; color: var(--red); border: 2px solid var(--red); display: block; }
     .msg.success { background: #dcfce7; color: var(--green); border: 2px solid var(--green); display: block; }
+
+    /* Trial badge */
+    .trial-badge {
+      display: inline-flex; align-items: center; gap: 8px; margin: 0 auto 24px;
+      background: #fff; border: 2px solid var(--ink-900); border-radius: 999px;
+      padding: 8px 18px; font-weight: 800; font-size: .85rem; color: var(--ink-900);
+    }
+    .trial-badge .count { background: var(--brand-500); border-radius: 6px; padding: 2px 8px; }
+    .trial-badge.unlocked { background: var(--ink-900); color: #fff; border-color: var(--ink-900); }
+    .trial-badge.unlocked .count { background: var(--green); color: #fff; }
+    .trial-wrap { text-align: center; }
+
+    /* Paywall overlay */
+    .paywall {
+      position: fixed; inset: 0; z-index: 100; display: none;
+      align-items: center; justify-content: center; padding: 20px;
+      background: rgba(17,17,17,.72); backdrop-filter: blur(4px);
+    }
+    .paywall.show { display: flex; }
+    .paywall-card {
+      background: #fff; border: 2px solid var(--ink-900); border-radius: var(--radius);
+      box-shadow: 12px 12px 0 var(--brand-500);
+      max-width: 460px; width: 100%; padding: 36px 32px; text-align: center;
+    }
+    .paywall-card .lock { font-size: 2.4rem; margin-bottom: 10px; }
+    .paywall-card h2 { font-size: 1.6rem; text-transform: uppercase; margin-bottom: 10px; }
+    .paywall-card p { color: var(--ink-500); font-size: .98rem; margin-bottom: 22px; }
+    .paywall-price { font-size: 2.6rem; font-weight: 900; color: var(--ink-900); margin-bottom: 4px; }
+    .paywall-price small { font-size: 1rem; color: var(--ink-500); font-weight: 600; }
+    .paywall-note { color: var(--ink-500); font-size: .85rem; margin-bottom: 22px; }
+    .paywall .btn-primary { width: 100%; margin-bottom: 16px; }
+    .code-row { display: flex; gap: 8px; margin-top: 6px; }
+    .code-row input { flex: 1; }
+    .code-toggle { background: none; border: none; color: var(--ink-500); font-family: inherit; font-size: .82rem; text-decoration: underline; cursor: pointer; margin-top: 6px; }
+    .code-box { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .code-box.show { display: block; }
+    .paywall-close { background: none; border: none; color: var(--ink-500); font-family: inherit; font-size: .82rem; cursor: pointer; margin-top: 14px; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -127,6 +164,14 @@
       <div class="head">
         <h1>AI Optimizer Tool</h1>
         <p>Pick what you want to improve, paste your text, and let AI do the rest.</p>
+      </div>
+
+      <div class="trial-wrap">
+        <span class="trial-badge" id="trialBadge">
+          <span id="trialLabel">Free trial:</span>
+          <span class="count" id="trialCount">3</span>
+          <span id="trialWord">tries left</span>
+        </span>
       </div>
 
       <div class="tabs" id="tabs">
@@ -172,10 +217,51 @@
     </div>
   </div>
 
+  <!-- Paywall overlay -->
+  <div class="paywall" id="paywall">
+    <div class="paywall-card">
+      <div class="lock">🔒</div>
+      <h2>Free Trial Used Up</h2>
+      <p>You've used all your free optimizations. Unlock unlimited access to keep improving your profile, resume, and cover letters.</p>
+      <div class="paywall-price">€19 <small>once</small></div>
+      <div class="paywall-note">Lifetime access · no subscription</div>
+      <a href="#" class="btn btn-primary" id="buyBtn">Unlock Unlimited Access →</a>
+
+      <button class="code-toggle" id="codeToggle">I already have an access code</button>
+      <div class="code-box" id="codeBox">
+        <label for="codeInput">Enter your access code</label>
+        <div class="code-row">
+          <input type="text" id="codeInput" placeholder="LIO-XXXX-XXXX">
+          <button class="btn btn-ghost" id="codeApply">Apply</button>
+        </div>
+        <div class="msg" id="codeMsg"></div>
+      </div>
+
+      <button class="paywall-close" id="paywallClose">Maybe later</button>
+    </div>
+  </div>
+
   <script>
     // If you host the API on the same domain (Vercel), leave this empty.
     // Otherwise set it to your backend origin, e.g. "https://linkedin-optimizer-backend-th40.vercel.app".
     const API_BASE = "";
+
+    /* ---------- Free trial / paywall config ---------- */
+    const FREE_TRIES = 3;                 // number of free optimizations
+    const LS_USED = "lio_uses";           // localStorage key: uses so far
+    const LS_UNLOCKED = "lio_unlocked";   // localStorage key: "1" if paid/unlocked
+
+    const LS_CODE = "lio_code";           // localStorage key: the user's access code
+
+    // Your PayPal payment link — REPLACE with your real PayPal.Me or checkout URL.
+    // Example: "https://www.paypal.com/paypalme/yourname/19"
+    const PAYMENT_URL = "https://www.paypal.com/paypalme/YOURNAME/19EUR";
+
+    function isUnlocked() { return localStorage.getItem(LS_UNLOCKED) === "1"; }
+    function getCode() { return localStorage.getItem(LS_CODE) || ""; }
+    function getUses() { return parseInt(localStorage.getItem(LS_USED) || "0", 10); }
+    function setUses(n) { localStorage.setItem(LS_USED, String(n)); }
+    function triesLeft() { return Math.max(0, FREE_TRIES - getUses()); }
 
     const MODE_META = {
       headline:     { title: "Your Headline",        hint: "Paste your current LinkedIn headline.", showContext: true },
@@ -199,6 +285,85 @@
     const charCount = document.getElementById("charCount");
     const copyBtn = document.getElementById("copyBtn");
     const downloadBtn = document.getElementById("downloadBtn");
+
+    // Trial / paywall elements
+    const trialBadge = document.getElementById("trialBadge");
+    const trialLabel = document.getElementById("trialLabel");
+    const trialCount = document.getElementById("trialCount");
+    const trialWord = document.getElementById("trialWord");
+    const paywall = document.getElementById("paywall");
+    const buyBtn = document.getElementById("buyBtn");
+    const codeToggle = document.getElementById("codeToggle");
+    const codeBox = document.getElementById("codeBox");
+    const codeInput = document.getElementById("codeInput");
+    const codeApply = document.getElementById("codeApply");
+    const codeMsg = document.getElementById("codeMsg");
+    const paywallClose = document.getElementById("paywallClose");
+
+    /* ---------- Trial UI ---------- */
+    function updateTrialUI() {
+      if (isUnlocked()) {
+        trialBadge.classList.add("unlocked");
+        trialLabel.textContent = "✓ Unlimited access";
+        trialCount.style.display = "none";
+        trialWord.style.display = "none";
+        return;
+      }
+      trialBadge.classList.remove("unlocked");
+      const left = triesLeft();
+      trialLabel.textContent = "Free trial:";
+      trialCount.style.display = "";
+      trialWord.style.display = "";
+      trialCount.textContent = left;
+      trialWord.textContent = left === 1 ? "try left" : "tries left";
+    }
+
+    function showPaywall() { paywall.classList.add("show"); }
+    function hidePaywall() { paywall.classList.remove("show"); }
+
+    // Buy button → your payment link
+    buyBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = PAYMENT_URL;
+    });
+
+    // Access code UI — verifies the code against the SERVER (bypass-proof).
+    codeToggle.addEventListener("click", () => codeBox.classList.toggle("show"));
+    paywallClose.addEventListener("click", hidePaywall);
+    codeApply.addEventListener("click", async () => {
+      const code = (codeInput.value || "").trim().toUpperCase();
+      codeMsg.className = "msg";
+      if (!code) {
+        codeMsg.textContent = "Please enter your access code.";
+        codeMsg.className = "msg error";
+        return;
+      }
+      codeMsg.textContent = "Checking...";
+      codeMsg.className = "msg";
+      // Verify by making a real (tiny) request with the code.
+      try {
+        const res = await fetch(API_BASE + "/api/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+        if (res.ok && data.valid) {
+          localStorage.setItem(LS_UNLOCKED, "1");
+          localStorage.setItem(LS_CODE, code);
+          codeMsg.textContent = "Success! Unlimited access unlocked.";
+          codeMsg.className = "msg success";
+          updateTrialUI();
+          setTimeout(hidePaywall, 1200);
+        } else {
+          codeMsg.textContent = data.error || "Invalid code. Please check and try again.";
+          codeMsg.className = "msg error";
+        }
+      } catch {
+        codeMsg.textContent = "Could not verify code. Please try again.";
+        codeMsg.className = "msg error";
+      }
+    });
 
     // Tab switching
     tabs.addEventListener("click", (e) => {
@@ -228,6 +393,12 @@
       const text = inputText.value.trim();
       clearMsg();
 
+      // Gate: block if free trial is used up (and not unlocked)
+      if (!isUnlocked() && triesLeft() <= 0) {
+        showPaywall();
+        return;
+      }
+
       if (text.length < 5) {
         showMsg("Please enter at least a few words.", "error");
         return;
@@ -247,6 +418,7 @@
             mode: currentMode,
             text: text,
             context: contextText.value.trim() || undefined,
+            code: getCode() || undefined,
           }),
         });
 
@@ -259,7 +431,20 @@
         output.textContent = data.result || "(No result returned)";
         copyBtn.style.display = "inline-flex";
         downloadBtn.style.display = "inline-flex";
-        showMsg("Done! Review your optimized " + (data.label || "result") + " below.", "success");
+
+        // Count a successful use (only if not unlocked)
+        if (!isUnlocked()) {
+          setUses(getUses() + 1);
+          updateTrialUI();
+        }
+
+        const leftNote = isUnlocked() ? "" : " (" + triesLeft() + " free " + (triesLeft() === 1 ? "try" : "tries") + " left)";
+        showMsg("Done! Review your optimized " + (data.label || "result") + " below." + leftNote, "success");
+
+        // If that was the last free try, gently surface the paywall next time
+        if (!isUnlocked() && triesLeft() <= 0) {
+          setTimeout(showPaywall, 900);
+        }
       } catch (err) {
         output.innerHTML = '<span class="placeholder-txt">Your optimized result will appear here...</span>';
         showMsg(err.message || "Request failed.", "error");
