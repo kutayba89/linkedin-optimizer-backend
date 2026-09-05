@@ -114,7 +114,14 @@ export default async function handler(req, res) {
       }
     }
 
-    const { mode, text, context, code } = body || {};
+    const { mode, text, context, code, lang } = body || {};
+
+    // Language for the AI output: "de" (German) or "en" (English). Default English.
+    const language = lang === "de" ? "de" : "en";
+    const languageInstruction =
+      language === "de"
+        ? "\n\nWICHTIG: Antworte ausschließlich auf Deutsch. Verwende professionelles, natürliches Deutsch."
+        : "\n\nIMPORTANT: Respond only in English.";
 
     // Server-side license gate (bypass-proof). Only blocks when you turn it on.
     if (isEnforcing() && !isValidCode(code)) {
@@ -151,7 +158,7 @@ export default async function handler(req, res) {
     // Gemini uses a systemInstruction field instead of a system message.
     const model = genAI.getGenerativeModel({
       model: MODEL,
-      systemInstruction: selected.system,
+      systemInstruction: selected.system + languageInstruction,
       generationConfig: { maxOutputTokens: 1500, temperature: 0.7 },
     });
 

@@ -45,6 +45,9 @@
     .brand .dot { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; background: var(--brand-500); color: #111; font-size: 16px; }
     .nav a.back { color: var(--ink-900); text-decoration: none; font-weight: 600; font-size: .9rem; }
     .nav a.back:hover { color: var(--brand-700); }
+    .lang-switch { display: inline-flex; border: 2px solid var(--ink-900); border-radius: 999px; overflow: hidden; }
+    .lang-btn { font-family: inherit; font-weight: 800; font-size: .8rem; padding: 5px 12px; border: none; background: #fff; color: var(--ink-900); cursor: pointer; transition: all .15s; }
+    .lang-btn.active { background: var(--ink-900); color: #fff; }
 
     /* Layout */
     .wrap { padding: 40px 20px 80px; }
@@ -155,15 +158,21 @@
   <nav class="nav">
     <div class="nav-inner">
       <a href="/index.html" class="brand"><span class="dot">🚀</span> LinkedIn Optimizer</a>
-      <a href="/index.html" class="back">← Back to Home</a>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="lang-switch" id="langSwitch">
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="de">DE</button>
+        </div>
+        <a href="/index.html" class="back" id="backLink">← Back to Home</a>
+      </div>
     </div>
   </nav>
 
   <div class="wrap">
     <div class="container">
       <div class="head">
-        <h1>AI Optimizer Tool</h1>
-        <p>Pick what you want to improve, paste your text, and let AI do the rest.</p>
+        <h1 id="headTitle">AI Optimizer Tool</h1>
+        <p id="headSub">Pick what you want to improve, paste your text, and let AI do the rest.</p>
       </div>
 
       <div class="trial-wrap">
@@ -187,14 +196,14 @@
         <div class="card">
           <h3 id="inputTitle">Your Headline</h3>
           <div class="field">
-            <label for="inputText">Your text</label>
+            <label for="inputText" id="lblYourText">Your text</label>
             <div class="hint" id="inputHint">Paste your current LinkedIn headline.</div>
             <textarea id="inputText" maxlength="8000" placeholder="Paste your text here..."></textarea>
             <div class="counter"><span id="charCount">0</span> / 8000</div>
           </div>
 
           <div class="field" id="contextField">
-            <label for="contextText">Target role / company <span style="font-weight:500;color:var(--ink-500)">(optional)</span></label>
+            <label for="contextText"><span id="lblContext">Target role / company</span> <span id="lblOptional" style="font-weight:500;color:var(--ink-500)">(optional)</span></label>
             <input type="text" id="contextText" placeholder="e.g. Senior Product Manager at Spotify">
           </div>
 
@@ -205,7 +214,7 @@
         <!-- Output -->
         <div class="card">
           <div class="result-head">
-            <h3>Result</h3>
+            <h3 id="resultTitle">Result</h3>
             <div class="result-actions">
               <button class="btn btn-ghost" id="copyBtn" style="display:none">Copy</button>
               <button class="btn btn-ghost" id="downloadBtn" style="display:none">Download</button>
@@ -221,15 +230,15 @@
   <div class="paywall" id="paywall">
     <div class="paywall-card">
       <div class="lock">🔒</div>
-      <h2>Free Trial Used Up</h2>
-      <p>You've used all your free optimizations. Unlock unlimited access to keep improving your profile, resume, and cover letters.</p>
+      <h2 id="payTitle">Free Trial Used Up</h2>
+      <p id="payText">You've used all your free optimizations. Unlock unlimited access to keep improving your profile, resume, and cover letters.</p>
       <div class="paywall-price">€19 <small>once</small></div>
-      <div class="paywall-note">Lifetime access · no subscription</div>
+      <div class="paywall-note" id="payNote">Lifetime access · no subscription</div>
       <a href="#" class="btn btn-primary" id="buyBtn">Unlock Unlimited Access →</a>
 
       <button class="code-toggle" id="codeToggle">I already have an access code</button>
       <div class="code-box" id="codeBox">
-        <label for="codeInput">Enter your access code</label>
+        <label for="codeInput" id="lblEnterCode">Enter your access code</label>
         <div class="code-row">
           <input type="text" id="codeInput" placeholder="LIO-XXXX-XXXX">
           <button class="btn btn-ghost" id="codeApply">Apply</button>
@@ -245,6 +254,113 @@
     // If you host the API on the same domain (Vercel), leave this empty.
     // Otherwise set it to your backend origin, e.g. "https://linkedin-optimizer-backend-th40.vercel.app".
     const API_BASE = "";
+
+    /* ---------- Language (DE / EN) ---------- */
+    const LS_LANG = "lio_lang";
+    const I18N = {
+      en: {
+        headTitle: "AI Optimizer Tool",
+        headSub: "Pick what you want to improve, paste your text, and let AI do the rest.",
+        tab_headline: "✍️ Headline", tab_summary: "📝 About / Summary", tab_experience: "📋 Experience", tab_resume: "📄 Resume", tab_cover_letter: "💼 Cover Letter",
+        yourText: "Your text", contextLabel: "Target role / company", optional: "(optional)",
+        contextPlaceholder: "e.g. Senior Product Manager at Spotify",
+        inputPlaceholder: "Paste your text here...",
+        optimize: "Optimize", optimizing: "Optimizing...",
+        resultTitle: "Result", copy: "Copy", copied: "Copied!", download: "Download",
+        resultPlaceholder: "Your optimized result will appear here...", thinking: "Thinking...",
+        back: "← Back to Home",
+        trialLabel: "Free trial:", triesLeft: "tries left", tryLeft: "try left", unlimited: "✓ Unlimited access",
+        needWords: "Please enter at least a few words.",
+        doneMsg: "Done! Review your optimized result below.",
+        payTitle: "Free Trial Used Up", payText: "You've used all your free optimizations. Unlock unlimited access to keep improving your profile, resume, and cover letters.",
+        payNote: "Lifetime access · no subscription", unlock: "Unlock Unlimited Access →",
+        haveCode: "I already have an access code", enterCode: "Enter your access code", apply: "Apply", later: "Maybe later",
+        checking: "Checking...", codeSuccess: "Success! Unlimited access unlocked.", codeInvalid: "Invalid code. Please check and try again.", codeEmpty: "Please enter your access code.", codeError: "Could not verify code. Please try again.",
+        titles: { headline:"Your Headline", summary:"Your About / Summary", experience:"Your Experience", resume:"Your Resume", cover_letter:"Your Background" },
+        hints: { headline:"Paste your current LinkedIn headline.", summary:"Paste your current LinkedIn About section.", experience:"Paste a job title + description or your current bullet points.", resume:"Paste your resume text (or a section of it).", cover_letter:"Paste your background, key skills, and experience." },
+      },
+      de: {
+        headTitle: "KI-Optimierungstool",
+        headSub: "Wähle aus, was du verbessern möchtest, füge deinen Text ein und lass die KI den Rest erledigen.",
+        tab_headline: "✍️ Schlagzeile", tab_summary: "📝 Info / Zusammenfassung", tab_experience: "📋 Berufserfahrung", tab_resume: "📄 Lebenslauf", tab_cover_letter: "💼 Anschreiben",
+        yourText: "Dein Text", contextLabel: "Zielrolle / Unternehmen", optional: "(optional)",
+        contextPlaceholder: "z. B. Senior Product Manager bei Spotify",
+        inputPlaceholder: "Füge deinen Text hier ein...",
+        optimize: "Optimieren", optimizing: "Optimiere...",
+        resultTitle: "Ergebnis", copy: "Kopieren", copied: "Kopiert!", download: "Herunterladen",
+        resultPlaceholder: "Dein optimiertes Ergebnis erscheint hier...", thinking: "Einen Moment...",
+        back: "← Zurück zur Startseite",
+        trialLabel: "Kostenlose Testversion:", triesLeft: "Versuche übrig", tryLeft: "Versuch übrig", unlimited: "✓ Unbegrenzter Zugang",
+        needWords: "Bitte gib mindestens ein paar Wörter ein.",
+        doneMsg: "Fertig! Sieh dir unten dein optimiertes Ergebnis an.",
+        payTitle: "Testversion aufgebraucht", payText: "Du hast alle kostenlosen Optimierungen genutzt. Schalte unbegrenzten Zugang frei, um dein Profil, deinen Lebenslauf und deine Anschreiben weiter zu verbessern.",
+        payNote: "Lebenslanger Zugang · kein Abo", unlock: "Unbegrenzten Zugang freischalten →",
+        haveCode: "Ich habe bereits einen Zugangscode", enterCode: "Gib deinen Zugangscode ein", apply: "Anwenden", later: "Vielleicht später",
+        checking: "Prüfe...", codeSuccess: "Erfolg! Unbegrenzter Zugang freigeschaltet.", codeInvalid: "Ungültiger Code. Bitte prüfen und erneut versuchen.", codeEmpty: "Bitte gib deinen Zugangscode ein.", codeError: "Code konnte nicht geprüft werden. Bitte versuche es erneut.",
+        titles: { headline:"Deine Schlagzeile", summary:"Deine Info / Zusammenfassung", experience:"Deine Berufserfahrung", resume:"Dein Lebenslauf", cover_letter:"Dein Hintergrund" },
+        hints: { headline:"Füge deine aktuelle LinkedIn-Schlagzeile ein.", summary:"Füge deinen aktuellen LinkedIn-Info-Bereich ein.", experience:"Füge einen Jobtitel + Beschreibung oder deine aktuellen Stichpunkte ein.", resume:"Füge deinen Lebenslauf-Text ein (oder einen Abschnitt).", cover_letter:"Füge deinen Hintergrund, deine Kernkompetenzen und Erfahrung ein." },
+      },
+    };
+
+    function detectLang() {
+      const saved = localStorage.getItem(LS_LANG);
+      if (saved === "en" || saved === "de") return saved;
+      return (navigator.language || "").toLowerCase().startsWith("de") ? "de" : "de";
+    }
+    let LANG = detectLang();
+    function t(key) { return (I18N[LANG] && I18N[LANG][key] !== undefined) ? I18N[LANG][key] : I18N.en[key]; }
+
+    // Swaps all visible UI text into the current language.
+    function applyLanguage() {
+      document.documentElement.lang = LANG;
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set("headTitle", t("headTitle"));
+      set("headSub", t("headSub"));
+      set("lblYourText", t("yourText"));
+      set("lblContext", t("contextLabel"));
+      set("lblOptional", t("optional"));
+      set("resultTitle", t("resultTitle"));
+      set("backLink", t("back"));
+      // Tabs
+      document.querySelectorAll(".tab").forEach((b) => { b.textContent = t("tab_" + b.dataset.mode); });
+      // Placeholders
+      const it = document.getElementById("inputText"); if (it) it.placeholder = t("inputPlaceholder");
+      const ct = document.getElementById("contextText"); if (ct) ct.placeholder = t("contextPlaceholder");
+      // Buttons (only if not mid-loading)
+      const ob = document.getElementById("optimizeBtn");
+      if (ob && !ob.disabled) ob.innerHTML = t("optimize") + ' <span>\u2192</span>';
+      const cp = document.getElementById("copyBtn"); if (cp) cp.textContent = t("copy");
+      const dl = document.getElementById("downloadBtn"); if (dl) dl.textContent = t("download");
+      // Input title/hint for the active mode
+      const itl = document.getElementById("inputTitle"); if (itl) itl.textContent = t("titles")[currentMode];
+      const ih = document.getElementById("inputHint"); if (ih) ih.textContent = t("hints")[currentMode];
+      // Output placeholder (only if still showing placeholder)
+      const outEl = document.getElementById("output");
+      if (outEl && outEl.querySelector(".placeholder-txt")) {
+        outEl.innerHTML = '<span class="placeholder-txt">' + t("resultPlaceholder") + '</span>';
+      }
+      // Paywall text
+      set("payTitle", t("payTitle"));
+      set("payText", t("payText"));
+      set("payNote", t("payNote"));
+      set("buyBtn", t("unlock"));
+      set("codeToggle", t("haveCode"));
+      set("lblEnterCode", t("enterCode"));
+      set("codeApply", t("apply"));
+      set("paywallClose", t("later"));
+      // Language buttons active state
+      document.querySelectorAll(".lang-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.lang === LANG);
+      });
+      // Trial badge
+      if (typeof updateTrialUI === "function") updateTrialUI();
+    }
+
+    function setLanguage(l) {
+      LANG = (l === "de") ? "de" : "en";
+      localStorage.setItem(LS_LANG, LANG);
+      applyLanguage();
+    }
 
     /* ---------- Free trial / paywall config ---------- */
     const FREE_TRIES = 3;                 // number of free optimizations
@@ -304,18 +420,18 @@
     function updateTrialUI() {
       if (isUnlocked()) {
         trialBadge.classList.add("unlocked");
-        trialLabel.textContent = "✓ Unlimited access";
+        trialLabel.textContent = t("unlimited");
         trialCount.style.display = "none";
         trialWord.style.display = "none";
         return;
       }
       trialBadge.classList.remove("unlocked");
       const left = triesLeft();
-      trialLabel.textContent = "Free trial:";
+      trialLabel.textContent = t("trialLabel");
       trialCount.style.display = "";
       trialWord.style.display = "";
       trialCount.textContent = left;
-      trialWord.textContent = left === 1 ? "try left" : "tries left";
+      trialWord.textContent = left === 1 ? t("tryLeft") : t("triesLeft");
     }
 
     function showPaywall() { paywall.classList.add("show"); }
@@ -419,6 +535,7 @@
             text: text,
             context: contextText.value.trim() || undefined,
             code: getCode() || undefined,
+            lang: LANG,
           }),
         });
 
@@ -454,6 +571,11 @@
       }
     }
 
+    // Language toggle buttons
+    document.querySelectorAll(".lang-btn").forEach((b) => {
+      b.addEventListener("click", () => setLanguage(b.dataset.lang));
+    });
+
     optimizeBtn.addEventListener("click", optimize);
 
     copyBtn.addEventListener("click", async () => {
@@ -475,6 +597,9 @@
       a.click();
       URL.revokeObjectURL(url);
     });
+
+    // Apply language on first load (also sets trial badge)
+    applyLanguage();
   </script>
 </body>
 </html>
