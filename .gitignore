@@ -1,0 +1,16 @@
+# Dependencies (Vercel installs these automatically)
+node_modules/
+
+# Vercel
+.vercel
+
+# Environment variables — NEVER commit secrets
+.env*
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

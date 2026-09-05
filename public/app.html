@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Optimizer — Tool</title>
+  <meta name="description" content="AI-powered LinkedIn profile, resume, and cover letter optimizer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-500: #FFD200;
+      --brand-600: #F5C400;
+      --brand-700: #E0B400;
+      --ink-900: #111111;
+      --ink-700: #2b2b2b;
+      --ink-500: #6b6b6b;
+      --ink-300: #d4d4d4;
+      --bg: #ffffff;
+      --bg-soft: #f7f7f7;
+      --border: #e5e5e5;
+      --green: #16a34a;
+      --red: #dc2626;
+      --radius: 8px;
+      --radius-sm: 6px;
+      --shadow-md: 0 6px 20px rgba(0,0,0,.10);
+      --shadow-lg: 0 16px 40px rgba(0,0,0,.16);
+      --max: 1120px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--ink-700); line-height: 1.6; background: var(--bg-soft);
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    h1, h2, h3 { color: var(--ink-900); font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
+
+    /* Navbar */
+    .nav { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 2px solid var(--ink-900); }
+    .nav-inner { max-width: var(--max); margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; color: var(--ink-900); font-size: 1.2rem; text-transform: uppercase; letter-spacing: -0.02em; text-decoration: none; }
+    .brand .dot { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; background: var(--brand-500); color: #111; font-size: 16px; }
+    .nav a.back { color: var(--ink-900); text-decoration: none; font-weight: 600; font-size: .9rem; }
+    .nav a.back:hover { color: var(--brand-700); }
+
+    /* Layout */
+    .wrap { padding: 40px 20px 80px; }
+    .head { text-align: center; max-width: 640px; margin: 0 auto 36px; }
+    .head h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); text-transform: uppercase; margin-bottom: 10px; }
+    .head p { color: var(--ink-500); font-size: 1.05rem; }
+
+    /* Mode tabs */
+    .tabs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 28px; }
+    .tab {
+      font-family: inherit; font-weight: 700; font-size: .9rem; cursor: pointer;
+      padding: 10px 18px; border-radius: 999px; background: #fff;
+      border: 2px solid var(--ink-900); color: var(--ink-900); transition: all .15s;
+    }
+    .tab:hover { background: var(--brand-500); }
+    .tab.active { background: var(--ink-900); color: #fff; }
+
+    /* Panel grid */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: #fff; border: 2px solid var(--ink-900); border-radius: var(--radius); padding: 24px; }
+    .card h3 { font-size: 1.05rem; text-transform: uppercase; margin-bottom: 14px; letter-spacing: .02em; }
+
+    label { display: block; font-weight: 700; font-size: .85rem; color: var(--ink-900); margin-bottom: 6px; }
+    .hint { font-weight: 500; color: var(--ink-500); font-size: .8rem; margin-bottom: 8px; }
+    textarea, input[type=text] {
+      width: 100%; font-family: inherit; font-size: .95rem; color: var(--ink-900);
+      padding: 12px 14px; border: 2px solid var(--border); border-radius: var(--radius-sm);
+      resize: vertical; transition: border-color .15s; background: #fff;
+    }
+    textarea:focus, input[type=text]:focus { outline: none; border-color: var(--ink-900); }
+    textarea { min-height: 200px; }
+    .field { margin-bottom: 18px; }
+    .counter { text-align: right; font-size: .75rem; color: var(--ink-500); margin-top: 4px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-weight: 700; font-size: 1rem; padding: 14px 26px;
+      border-radius: var(--radius-sm); cursor: pointer; border: none; text-decoration: none;
+      transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .btn-primary { background: var(--brand-500); color: #111; box-shadow: var(--shadow-md); width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--brand-600); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-ghost { background: #fff; border: 2px solid var(--ink-900); color: var(--ink-900); font-size: .85rem; padding: 8px 16px; }
+    .btn-ghost:hover { background: var(--ink-900); color: #fff; }
+
+    /* Result */
+    .result-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+    .result-head h3 { margin-bottom: 0; }
+    .result-actions { display: flex; gap: 8px; }
+    .output {
+      white-space: pre-wrap; font-size: .95rem; color: var(--ink-900); line-height: 1.7;
+      min-height: 200px; background: var(--bg-soft); border: 2px dashed var(--border);
+      border-radius: var(--radius-sm); padding: 16px; overflow-wrap: break-word;
+    }
+    .placeholder-txt { color: var(--ink-500); font-style: italic; }
+
+    /* Spinner */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,.2); border-top-color: #111; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .msg { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; font-weight: 600; margin-top: 14px; display: none; }
+    .msg.error { background: #fee2e2; color: var(--red); border: 2px solid var(--red); display: block; }
+    .msg.success { background: #dcfce7; color: var(--green); border: 2px solid var(--green); display: block; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="brand"><span class="dot">🚀</span> LinkedIn Optimizer</a>
+      <a href="/index.html" class="back">← Back to Home</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="container">
+      <div class="head">
+        <h1>AI Optimizer Tool</h1>
+        <p>Pick what you want to improve, paste your text, and let AI do the rest.</p>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-mode="headline">✍️ Headline</button>
+        <button class="tab" data-mode="summary">📝 About / Summary</button>
+        <button class="tab" data-mode="experience">📋 Experience</button>
+        <button class="tab" data-mode="resume">📄 Resume</button>
+        <button class="tab" data-mode="cover_letter">💼 Cover Letter</button>
+      </div>
+
+      <div class="grid">
+        <!-- Input -->
+        <div class="card">
+          <h3 id="inputTitle">Your Headline</h3>
+          <div class="field">
+            <label for="inputText">Your text</label>
+            <div class="hint" id="inputHint">Paste your current LinkedIn headline.</div>
+            <textarea id="inputText" maxlength="8000" placeholder="Paste your text here..."></textarea>
+            <div class="counter"><span id="charCount">0</span> / 8000</div>
+          </div>
+
+          <div class="field" id="contextField">
+            <label for="contextText">Target role / company <span style="font-weight:500;color:var(--ink-500)">(optional)</span></label>
+            <input type="text" id="contextText" placeholder="e.g. Senior Product Manager at Spotify">
+          </div>
+
+          <button class="btn btn-primary" id="optimizeBtn">Optimize <span>→</span></button>
+          <div class="msg" id="msg"></div>
+        </div>
+
+        <!-- Output -->
+        <div class="card">
+          <div class="result-head">
+            <h3>Result</h3>
+            <div class="result-actions">
+              <button class="btn btn-ghost" id="copyBtn" style="display:none">Copy</button>
+              <button class="btn btn-ghost" id="downloadBtn" style="display:none">Download</button>
+            </div>
+          </div>
+          <div class="output" id="output"><span class="placeholder-txt">Your optimized result will appear here...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // If you host the API on the same domain (Vercel), leave this empty.
+    // Otherwise set it to your backend origin, e.g. "https://linkedin-optimizer-backend-th40.vercel.app".
+    const API_BASE = "";
+
+    const MODE_META = {
+      headline:     { title: "Your Headline",        hint: "Paste your current LinkedIn headline.", showContext: true },
+      summary:      { title: "Your About / Summary", hint: "Paste your current LinkedIn About section.", showContext: true },
+      experience:   { title: "Your Experience",      hint: "Paste a job title + description or your current bullet points.", showContext: true },
+      resume:       { title: "Your Resume",          hint: "Paste your resume text (or a section of it).", showContext: true },
+      cover_letter: { title: "Your Background",       hint: "Paste your background, key skills, and experience.", showContext: true },
+    };
+
+    let currentMode = "headline";
+
+    const tabs = document.getElementById("tabs");
+    const inputText = document.getElementById("inputText");
+    const contextText = document.getElementById("contextText");
+    const contextField = document.getElementById("contextField");
+    const inputTitle = document.getElementById("inputTitle");
+    const inputHint = document.getElementById("inputHint");
+    const optimizeBtn = document.getElementById("optimizeBtn");
+    const output = document.getElementById("output");
+    const msg = document.getElementById("msg");
+    const charCount = document.getElementById("charCount");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    // Tab switching
+    tabs.addEventListener("click", (e) => {
+      const btn = e.target.closest(".tab");
+      if (!btn) return;
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      btn.classList.add("active");
+      currentMode = btn.dataset.mode;
+      const meta = MODE_META[currentMode];
+      inputTitle.textContent = meta.title;
+      inputHint.textContent = meta.hint;
+      contextField.style.display = meta.showContext ? "block" : "none";
+    });
+
+    // Char counter
+    inputText.addEventListener("input", () => {
+      charCount.textContent = inputText.value.length;
+    });
+
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = "msg " + type;
+    }
+    function clearMsg() { msg.className = "msg"; msg.textContent = ""; }
+
+    async function optimize() {
+      const text = inputText.value.trim();
+      clearMsg();
+
+      if (text.length < 5) {
+        showMsg("Please enter at least a few words.", "error");
+        return;
+      }
+
+      optimizeBtn.disabled = true;
+      optimizeBtn.innerHTML = '<span class="spinner"></span> Optimizing...';
+      output.innerHTML = '<span class="placeholder-txt">Thinking...</span>';
+      copyBtn.style.display = "none";
+      downloadBtn.style.display = "none";
+
+      try {
+        const res = await fetch(API_BASE + "/api/optimize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: currentMode,
+            text: text,
+            context: contextText.value.trim() || undefined,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong.");
+        }
+
+        output.textContent = data.result || "(No result returned)";
+        copyBtn.style.display = "inline-flex";
+        downloadBtn.style.display = "inline-flex";
+        showMsg("Done! Review your optimized " + (data.label || "result") + " below.", "success");
+      } catch (err) {
+        output.innerHTML = '<span class="placeholder-txt">Your optimized result will appear here...</span>';
+        showMsg(err.message || "Request failed.", "error");
+      } finally {
+        optimizeBtn.disabled = false;
+        optimizeBtn.innerHTML = 'Optimize <span>→</span>';
+      }
+    }
+
+    optimizeBtn.addEventListener("click", optimize);
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(output.textContent);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
+      } catch {
+        showMsg("Could not copy to clipboard.", "error");
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const blob = new Blob([output.textContent], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = currentMode + "-optimized.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

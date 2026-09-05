@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node api/index.js"
+    "dev": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.65.0"
+    "@google/generative-ai": "^0.24.1"
   }
 }
