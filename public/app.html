@@ -250,10 +250,32 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-config.js"></script>
   <script>
     // If you host the API on the same domain (Vercel), leave this empty.
-    // Otherwise set it to your backend origin, e.g. "https://linkedin-optimizer-backend-th40.vercel.app".
     const API_BASE = "";
+
+    // ---- Supabase auth: require login, get token for API calls ----
+    const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let AUTH_TOKEN = null;
+    let CURRENT_USER = null;
+
+    async function requireLogin() {
+      const { data } = await sbClient.auth.getSession();
+      if (!data.session) {
+        window.location.href = "/login.html";
+        return false;
+      }
+      AUTH_TOKEN = data.session.access_token;
+      CURRENT_USER = data.session.user;
+      return true;
+    }
+
+    async function doLogout() {
+      await sbClient.auth.signOut();
+      window.location.href = "/login.html";
+    }
 
     /* ---------- Language (DE / EN) ---------- */
     const LS_LANG = "lio_lang";
@@ -373,11 +395,10 @@
     // Example: "https://www.paypal.com/paypalme/yourname/19"
     const PAYMENT_URL = "https://www.paypal.com/paypalme/YOURNAME/19EUR";
 
-    function isUnlocked() { return localStorage.getItem(LS_UNLOCKED) === "1"; }
-    function getCode() { return localStorage.getItem(LS_CODE) || ""; }
-    function getUses() { return parseInt(localStorage.getItem(LS_USED) || "0", 10); }
-    function setUses(n) { localStorage.setItem(LS_USED, String(n)); }
-    function triesLeft() { return Math.max(0, FREE_TRIES - getUses()); }
+    // ---- Account state (from the server/database, NOT the browser) ----
+    let ACCOUNT = { usesCount: 0, isPaid: false, loaded: false };
+    function isUnlocked() { return ACCOUNT.isPaid === true; }
+    function triesLeft() { return Math.max(0, FREE_TRIES - (ACCOUNT.usesCount || 0)); }
 
     const MODE_META = {
       headline:     { title: "Your Headline",        hint: "Paste your current LinkedIn headline.", showContext: true },
@@ -509,11 +530,13 @@
       const text = inputText.value.trim();
       clearMsg();
 
-      // Gate: block if free trial is used up (and not unlocked)
+      // Gate: block if free trial is used up (server is the real authority)
       if (!isUnlocked() && triesLeft() <= 0) {
         showPaywall();
         return;
       }
+
+      if (!AUTH_TOKEN) { window.location.href = "/login.html"; return; }
 
       if (text.length < 5) {
         showMsg("Please enter at least a few words.", "error");
@@ -529,18 +552,30 @@
       try {
         const res = await fetch(API_BASE + "/api/optimize", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + AUTH_TOKEN,
+          },
           body: JSON.stringify({
             mode: currentMode,
             text: text,
             context: contextText.value.trim() || undefined,
-            code: getCode() || undefined,
             lang: LANG,
           }),
         });
 
         const data = await res.json();
 
+        // Handle auth / limit responses from the server
+        if (res.status === 401) { window.location.href = "/login.html"; return; }
+        if (res.status === 402 || data.code === "LIMIT_REACHED") {
+          if (typeof data.usesCount === "number") ACCOUNT.usesCount = data.usesCount;
+          if (typeof data.isPaid === "boolean") ACCOUNT.isPaid = data.isPaid;
+          updateTrialUI();
+          showPaywall();
+          output.innerHTML = '<span class="placeholder-txt">' + t("resultPlaceholder") + '</span>';
+          return;
+        }
         if (!res.ok) {
           throw new Error(data.error || "Something went wrong.");
         }
@@ -549,19 +584,18 @@
         copyBtn.style.display = "inline-flex";
         downloadBtn.style.display = "inline-flex";
 
-        // Count a successful use (only if not unlocked)
-        if (!isUnlocked()) {
-          setUses(getUses() + 1);
-          updateTrialUI();
-        }
+        // Update account state from the SERVER response (source of truth)
+        if (typeof data.usesCount === "number") ACCOUNT.usesCount = data.usesCount;
+        if (typeof data.isPaid === "boolean") ACCOUNT.isPaid = data.isPaid;
+        updateTrialUI();
 
-        const leftNote = isUnlocked() ? "" : " (" + triesLeft() + " free " + (triesLeft() === 1 ? "try" : "tries") + " left)";
-        showMsg("Done! Review your optimized " + (data.label || "result") + " below." + leftNote, "success");
+        const left = triesLeft();
+        const leftNote = isUnlocked() ? "" : " (" + left + " free " + (left === 1 ? "try" : "tries") + " left)";
+        showMsg(t("doneMsg") + leftNote, "success");
 
-        // If that was the last free try, gently surface the paywall next time
-        if (!isUnlocked() && triesLeft() <= 0) {
-          setTimeout(showPaywall, 900);
-        }
+        // NOTE: We do NOT show the paywall here. The user keeps their result.
+        // The paywall only appears when they try a 4th time and the server
+        // returns 402 (LIMIT_REACHED) — handled above, before any result.
       } catch (err) {
         output.innerHTML = '<span class="placeholder-txt">Your optimized result will appear here...</span>';
         showMsg(err.message || "Request failed.", "error");
@@ -598,8 +632,46 @@
       URL.revokeObjectURL(url);
     });
 
-    // Apply language on first load (also sets trial badge)
-    applyLanguage();
+    // ---- Page startup: require login, then load account state ----
+    async function init() {
+      const ok = await requireLogin();
+      if (!ok) return; // redirected to login
+
+      // Show the logged-in user's email + a logout button in the navbar
+      try {
+        const navRow = document.querySelector(".nav-inner > div");
+        if (navRow && CURRENT_USER) {
+          const span = document.createElement("span");
+          span.style.cssText = "font-size:.8rem;color:var(--ink-500);font-weight:600;";
+          span.textContent = CURRENT_USER.email;
+          const out = document.createElement("button");
+          out.textContent = "Logout";
+          out.className = "lang-btn";
+          out.style.cssText = "border:2px solid var(--ink-900);border-radius:999px;";
+          out.addEventListener("click", doLogout);
+          navRow.insertBefore(span, navRow.firstChild);
+          navRow.appendChild(out);
+        }
+      } catch (e) {}
+
+      // Load the account's trial/paid status from the database (via a lightweight call).
+      try {
+        const r = await fetch(API_BASE + "/api/me", {
+          headers: { "Authorization": "Bearer " + AUTH_TOKEN },
+        });
+        if (r.ok) {
+          const me = await r.json();
+          if (typeof me.usesCount === "number") ACCOUNT.usesCount = me.usesCount;
+          if (typeof me.isPaid === "boolean") ACCOUNT.isPaid = me.isPaid;
+          ACCOUNT.loaded = true;
+        }
+      } catch (e) {}
+
+      applyLanguage();
+      updateTrialUI();
+    }
+
+    init();
   </script>
 </body>
 </html>

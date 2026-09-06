@@ -1,8 +1,22 @@
 // LinkedIn Optimizer API — powered by Google Gemini (free tier).
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from "@supabase/supabase-js";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const MODEL = "gemini-3.6-flash"; // fast + free-tier friendly
+
+// Free trial limit (per registered account, tracked in the database).
+const FREE_TRIES = 3;
+
+// Supabase admin client (server-side only — uses the secret service_role key).
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseReady = !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+const supabaseAdmin = supabaseReady
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  : null;
 
 /* ---------- License / access control ----------
  * Configured entirely via Vercel Environment Variables — no code changes needed later.
@@ -123,12 +137,45 @@ export default async function handler(req, res) {
         ? "\n\nWICHTIG: Antworte ausschließlich auf Deutsch. Verwende professionelles, natürliches Deutsch."
         : "\n\nIMPORTANT: Respond only in English.";
 
-    // Server-side license gate (bypass-proof). Only blocks when you turn it on.
-    if (isEnforcing() && !isValidCode(code)) {
-      return res.status(402).json({
-        error: "A valid access code is required. Please purchase access to continue.",
-        code: "LICENSE_REQUIRED",
-      });
+    // ---- Account-based trial gate (bypass-proof, tracked in the database) ----
+    // The browser sends the logged-in user's token in the Authorization header.
+    let profile = null;
+    let userId = null;
+    if (supabaseReady) {
+      const authHeader = req.headers.authorization || "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+      if (!token) {
+        return res.status(401).json({ error: "Please log in to use the tool.", code: "NOT_LOGGED_IN" });
+      }
+
+      // Verify the token with Supabase → get the real user (cannot be faked).
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
+      if (userErr || !userData || !userData.user) {
+        return res.status(401).json({ error: "Session expired. Please log in again.", code: "NOT_LOGGED_IN" });
+      }
+      userId = userData.user.id;
+
+      // Read their profile row (trial count + paid status).
+      const { data: prof, error: profErr } = await supabaseAdmin
+        .from("profiles")
+        .select("uses_count, is_paid")
+        .eq("id", userId)
+        .single();
+      if (profErr || !prof) {
+        return res.status(500).json({ error: "Could not load your account. Please try again." });
+      }
+      profile = prof;
+
+      // Gate: if not paid and out of free tries → block with paywall signal.
+      if (!profile.is_paid && profile.uses_count >= FREE_TRIES) {
+        return res.status(402).json({
+          error: "You've used all your free optimizations. Upgrade for unlimited access.",
+          code: "LIMIT_REACHED",
+          usesCount: profile.uses_count,
+          isPaid: profile.is_paid,
+        });
+      }
     }
 
     if (!mode || !MODES[mode]) {
@@ -165,7 +212,27 @@ export default async function handler(req, res) {
     const result = await model.generateContent(userContent);
     const responseText = result.response.text();
 
-    return res.status(200).json({ mode, label: selected.label, result: responseText });
+    // Count this successful use in the database (only for logged-in, non-paid users).
+    let usesCount = profile ? profile.uses_count : 0;
+    const isPaid = profile ? profile.is_paid : false;
+    if (supabaseReady && userId && profile && !profile.is_paid) {
+      usesCount = profile.uses_count + 1;
+      await supabaseAdmin
+        .from("profiles")
+        .update({ uses_count: usesCount })
+        .eq("id", userId);
+    }
+
+    const triesLeft = isPaid ? null : Math.max(0, FREE_TRIES - usesCount);
+
+    return res.status(200).json({
+      mode,
+      label: selected.label,
+      result: responseText,
+      usesCount,
+      isPaid,
+      triesLeft,
+    });
   } catch (error) {
     console.error("Gemini API error:", error);
     return res.status(500).json({ error: error.message || "Unknown error" });
